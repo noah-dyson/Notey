@@ -2,8 +2,15 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.ApplicationModel.Preview.Notes;
 using Windows.Storage;
 using Windows.Storage.Search;
+using Windows.Storage.Streams;
+using System.Collections.Generic;
+using Microsoft.UI.Xaml.Controls.AnimatedVisuals;
+using Microsoft.UI.Xaml.Media;
 
 
 // To learn more about WinUI, the WinUI project structure,
@@ -16,6 +23,8 @@ namespace Notey
     /// </summary>
     public sealed partial class MainWindow : Window
     {
+        List<Note> openNotes = new List<Note>();
+
         public MainWindow()
         {
             this.InitializeComponent();
@@ -43,13 +52,49 @@ namespace Notey
             if (NotesList.SelectedItem != null)
             {
                 string fileName = ((TextBlock)((ListViewItem)NotesList.SelectedItem).Content).Text; 
-                StorageFolder mainFolder = await StorageFolder.GetFolderFromPathAsync(@"D:\Dev\Windows Apps\Notey\Notes");
-                Debug.WriteLine("test");
-                StorageFile currentFile = await mainFolder.GetFileAsync(fileName);
 
-                string content = await FileIO.ReadTextAsync(currentFile);
-                NoteContent.Text = content;
+                string currentFile = @"D:\Dev\Windows Apps\Notey\Notes\" + fileName;
+
+                string fileContent = await File.ReadAllTextAsync(currentFile, System.Text.Encoding.UTF8);
+                
+                Note note = new Note(fileName, fileContent);
+
+                NotesTabs.TabItems.Add(note);
+                for (int i = 0; i < NotesTabs.TabItems.Count; i++)
+                {
+                    if (NotesTabs.TabItems[i] == note)
+                    {
+                        NotesTabs.SelectedItem = NotesTabs.TabItems[i];
+                    }
+                }
             }
+        }
+
+        private async void NotesTabs_TabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args)
+        {
+            await File.WriteAllTextAsync(@"D:\Dev\Windows Apps\Notey\Notes\" + ((Note)args.Item).Name, ((Note)args.Item).Content);
+
+            NotesTabs.TabItems.Remove(args.Item);
+        }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (sender is TextBox textBox && textBox.DataContext is Note note)
+            {
+                note.Content = textBox.Text;
+            }
+        }
+    }
+
+    public class Note
+    {         
+        public string Name { get; set; }
+        public string Content { get; set; }
+
+        public Note(string name, string content)
+        {
+            Name = name;
+            Content = content;
         }
     }
 }
