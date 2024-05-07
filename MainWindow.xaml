@@ -6,47 +6,55 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="5*" />
-        </Grid.ColumnDefinitions>
-        <Border Background="{ThemeResource CardBackgroundFillColorDefault}"
-                Grid.Column="0" />
-        <ListView Name="NotesList"
-                  Grid.Column="0"
-                  SelectionMode="Single"
-                  SelectionChanged="NotesList_SelectionChanged">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding Name}" />
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-        <TabView x:Name="NotesTabs"
-                 Grid.Column="1"
-                 TabCloseRequested="NotesTabs_TabCloseRequested">
-            <TabView.TabItemTemplate>
-                <DataTemplate x:DataType="local:Note">
-                    <RelativePanel>
-                        <RelativePanel.Resources>
-                            <Style TargetType="AppBarButton">
-                                <Setter Property="IsCompact"
-                                        Value="True" />
-                            </Style>
-                        </RelativePanel.Resources>
-                        <TextBox AcceptsReturn="True"
-                                 Text="{x:Bind Content, Mode=OneWay}"
-                                 TextChanged="TextBox_TextChanged"
-                                 TextWrapping="Wrap"
-                                 Grid.Column="1"
-                                 Margin="10, 10, 10, 10"
-                                 RelativePanel.AlignBottomWithPanel="True"
-                                 RelativePanel.AlignLeftWithPanel="True"
-                                 RelativePanel.AlignRightWithPanel="True" />
-                    </RelativePanel>
-                </DataTemplate>
-            </TabView.TabItemTemplate>
-        </TabView>
-    </Grid>
+    <RelativePanel>
+        <SelectorBar x:Name="SelectorBar">
+            <SelectorBarItem x:Name="SelectorBarNotes"
+                             Text="Notes"
+                             IsSelected="True"
+                             Icon="Page" />
+        </SelectorBar>
+        <Grid RelativePanel.Below="SelectorBar"
+              RelativePanel.AlignLeftWithPanel="True"
+              RelativePanel.AlignRightWithPanel="True"
+              RelativePanel.AlignBottomWithPanel="True">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="5*" />
+            </Grid.ColumnDefinitions>
+            <Border Background="{ThemeResource CardBackgroundFillColorDefault}"
+                    Grid.Column="0" />
+            <ListView Name="NotesList"
+                      Grid.Column="0"
+                      SelectionMode="Single"
+                      SelectionChanged="NotesList_SelectionChanged">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <TabView x:Name="NotesTabs"
+                     Grid.Column="1"
+                     IsAddTabButtonVisible="False"
+                     TabCloseRequested="NotesTabs_TabCloseRequested"
+                     VerticalAlignment="Stretch">
+                <TabView.TabItemTemplate>
+                    <DataTemplate x:DataType="local:Note">
+                        <TabViewItem>
+                            <TabViewItem.Header>
+                                <TextBlock Text="{x:Bind Date, Mode=OneWay}" />
+                            </TabViewItem.Header>
+                            <TextBox AcceptsReturn="True"
+                                     Text="{x:Bind Content, Mode=OneWay}"
+                                     TextChanged="TextBox_TextChanged"
+                                     TextWrapping="Wrap"
+                                     Margin="10, 10, 10, 10"
+                                     HorizontalAlignment="Stretch"
+                                     VerticalAlignment="Stretch" />
+                        </TabViewItem>
+                    </DataTemplate>
+                </TabView.TabItemTemplate>
+            </TabView>
+        </Grid>
+    </RelativePanel>
 </Window>

@@ -53,26 +53,37 @@ namespace Notey
             {
                 string fileName = ((TextBlock)((ListViewItem)NotesList.SelectedItem).Content).Text; 
 
-                string currentFile = @"D:\Dev\Windows Apps\Notey\Notes\" + fileName;
+                for (int i = 0; i < openNotes.Count; i++)
+                {
+                    if (openNotes[i].Title == fileName)
+                    {
+                        NotesTabs.SelectedItem = openNotes[i];
+                        return;
+                    }
+                }
 
+                string currentFile = @"D:\Dev\Windows Apps\Notey\Notes\" + fileName;
                 string fileContent = await File.ReadAllTextAsync(currentFile, System.Text.Encoding.UTF8);
-                
                 Note note = new Note(fileName, fileContent);
 
+                openNotes.Add(note);
                 NotesTabs.TabItems.Add(note);
+
                 for (int i = 0; i < NotesTabs.TabItems.Count; i++)
                 {
                     if (NotesTabs.TabItems[i] == note)
                     {
                         NotesTabs.SelectedItem = NotesTabs.TabItems[i];
                     }
-                }
+                }   
+
+                NotesTabs.UpdateLayout();
             }
         }
 
         private async void NotesTabs_TabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args)
         {
-            await File.WriteAllTextAsync(@"D:\Dev\Windows Apps\Notey\Notes\" + ((Note)args.Item).Name, ((Note)args.Item).Content);
+            await File.WriteAllTextAsync(@"D:\Dev\Windows Apps\Notey\Notes\" + ((Note)args.Item).Title, ((Note)args.Item).Content);
 
             NotesTabs.TabItems.Remove(args.Item);
         }
@@ -88,12 +99,14 @@ namespace Notey
 
     public class Note
     {         
-        public string Name { get; set; }
+        public string Title { get; set; }
         public string Content { get; set; }
+        public DateOnly Date { get; set; }
 
-        public Note(string name, string content)
+        public Note(string title, string content)
         {
-            Name = name;
+            Title = title;
+            Date = DateOnly.Parse(Title.Substring(0, 10));
             Content = content;
         }
     }
