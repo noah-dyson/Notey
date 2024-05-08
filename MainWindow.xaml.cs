@@ -1,17 +1,10 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
-using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.ApplicationModel.Preview.Notes;
 using Windows.Storage;
 using Windows.Storage.Search;
-using Windows.Storage.Streams;
 using System.Collections.Generic;
-using Microsoft.UI.Xaml.Controls.AnimatedVisuals;
-using Microsoft.UI.Xaml.Media;
-
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -24,6 +17,7 @@ namespace Notey
     public sealed partial class MainWindow : Window
     {
         List<Note> openNotes = new List<Note>();
+        List<Note> notes = new List<Note>();
 
         public MainWindow()
         {
@@ -39,11 +33,9 @@ namespace Notey
 
             foreach (StorageFile file in files)
             {
-                ListViewItem item = new ListViewItem();
-                TextBlock name = new TextBlock();
-                name.Text = file.Name;
-                item.Content = name;
-                NotesList.Items.Add(item);
+                Note note = new Note(file.Name);
+                notes.Add(note);
+                NotesList.Items.Add(note);
             }
         }
 
@@ -51,21 +43,21 @@ namespace Notey
         {
             if (NotesList.SelectedItem != null)
             {
-                string fileName = ((TextBlock)((ListViewItem)NotesList.SelectedItem).Content).Text; 
+                Note note = (Note)NotesList.SelectedItem;
 
                 for (int i = 0; i < openNotes.Count; i++)
                 {
-                    if (openNotes[i].Title == fileName)
+                    if (openNotes[i].Title == note.Title)
                     {
                         NotesTabs.SelectedItem = openNotes[i];
                         return;
                     }
                 }
 
-                string currentFile = @"D:\Dev\Windows Apps\Notey\Notes\" + fileName;
+                string currentFile = @"D:\Dev\Windows Apps\Notey\Notes\" + note.Title;
                 string fileContent = await File.ReadAllTextAsync(currentFile, System.Text.Encoding.UTF8);
-                Note note = new Note(fileName, fileContent);
-
+                
+                note.LoadContent(fileContent);
                 openNotes.Add(note);
                 NotesTabs.TabItems.Add(note);
 
@@ -85,6 +77,7 @@ namespace Notey
         {
             await File.WriteAllTextAsync(@"D:\Dev\Windows Apps\Notey\Notes\" + ((Note)args.Item).Title, ((Note)args.Item).Content);
 
+            openNotes.Remove((Note)args.Item);
             NotesTabs.TabItems.Remove(args.Item);
         }
 
@@ -95,19 +88,48 @@ namespace Notey
                 note.Content = textBox.Text;
             }
         }
-    }
 
-    public class Note
-    {         
-        public string Title { get; set; }
-        public string Content { get; set; }
-        public DateOnly Date { get; set; }
-
-        public Note(string title, string content)
+        private void SelectorBar_SelectionChanged(SelectorBar sender, SelectorBarSelectionChangedEventArgs args)
         {
-            Title = title;
-            Date = DateOnly.Parse(Title.Substring(0, 10));
-            Content = content;
+            SelectorBarItem selectedItem= sender.SelectedItem;
+            int currentSelectedIndex = sender.Items.IndexOf(selectedItem);
+
+            switch(currentSelectedIndex)
+            {
+                case 0:
+                    NotesList.Visibility = Visibility.Visible;
+                    AddView.Visibility = Visibility.Collapsed;
+                    break;
+                case 1:
+                    NotesList.Visibility = Visibility.Collapsed;
+                    AddView.Visibility = Visibility.Visible;
+                    break;
+            }
+        }
+
+        private void Calendar_CalendarViewDayItemChanging(CalendarView sender, CalendarViewDayItemChangingEventArgs args)
+        {
+            foreach (Note note in notes)
+            {
+                if (note.Date == DateOnly.FromDateTime(args.Item.Date.Date))
+                {
+                    args.Item.IsBlackout = true;
+                }
+            }
+        }
+
+        private void AddNoteButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (Calendar.SelectedDates.Count > 0)
+            {
+                string filename = Note.DateOnlytoTitle(DateOnly.FromDateTime(Calendar.SelectedDates[0].Date));
+                Note note = new Note(filename);
+                File.Create(@"D:\Dev\Windows Apps\Notey\Notes\" + filename);
+                notes.Add(note);
+                openNotes.Add(note);
+                NotesList.Items.Add(note);
+                NotesTabs.TabItems.Add(note);
+            }
         }
     }
 }

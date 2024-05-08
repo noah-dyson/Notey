@@ -7,19 +7,30 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d">
     <RelativePanel>
-        <SelectorBar x:Name="SelectorBar">
-            <SelectorBarItem x:Name="SelectorBarNotes"
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="ViewStates">
+                <VisualState x:Name="NotesViewState" />
+                <VisualState x:Name="AddViewState" />
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <SelectorBar x:Name="SelectorBar"
+                     SelectionChanged="SelectorBar_SelectionChanged">
+            <SelectorBarItem x:Name="NotesSelect"
                              Text="Notes"
                              IsSelected="True"
                              Icon="Page" />
+            <SelectorBarItem x:Name="AddNote"
+                             Text="Add Note"
+                             Icon="Add" />
         </SelectorBar>
         <Grid RelativePanel.Below="SelectorBar"
               RelativePanel.AlignLeftWithPanel="True"
               RelativePanel.AlignRightWithPanel="True"
               RelativePanel.AlignBottomWithPanel="True">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="350px" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="5*" />
             </Grid.ColumnDefinitions>
             <Border Background="{ThemeResource CardBackgroundFillColorDefault}"
                     Grid.Column="0" />
@@ -28,11 +39,29 @@
                       SelectionMode="Single"
                       SelectionChanged="NotesList_SelectionChanged">
                 <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Name}" />
+                    <DataTemplate x:DataType="local:Note">
+                        <ListViewItem>
+                            <TextBlock Text="{Binding Title}" />
+                        </ListViewItem>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
+            <StackPanel x:Name="AddView"
+                        Grid.Column="0"
+                        Orientation="Vertical"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Visibility="Collapsed">
+                <CalendarView x:Name="Calendar"
+                              SelectionMode="Single"
+                              Margin="10, 10, 10, 10"
+                              HorizontalAlignment="Center"
+                              CalendarViewDayItemChanging="Calendar_CalendarViewDayItemChanging"/>
+                <Button x:Name="AddNoteButton"
+                        Content="Add Note"
+                        Margin="10, 10, 10, 10"
+                        Click="AddNoteButton_Click"/>
+            </StackPanel>
             <TabView x:Name="NotesTabs"
                      Grid.Column="1"
                      IsAddTabButtonVisible="False"
