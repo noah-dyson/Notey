@@ -20,9 +20,6 @@
                              Text="Notes"
                              IsSelected="True"
                              Icon="Page" />
-            <SelectorBarItem x:Name="AddNote"
-                             Text="Add Note"
-                             Icon="Add" />
         </SelectorBar>
         <Grid RelativePanel.Below="SelectorBar"
               RelativePanel.AlignLeftWithPanel="True"
@@ -34,41 +31,36 @@
             </Grid.ColumnDefinitions>
             <Border Background="{ThemeResource CardBackgroundFillColorDefault}"
                     Grid.Column="0" />
-            <ListView Name="NotesList"
-                      Grid.Column="0"
-                      SelectionMode="Single"
-                      SelectionChanged="NotesList_SelectionChanged">
-                <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="local:Note">
-                        <ListViewItem>
-                            <TextBlock Text="{Binding Title}" />
-                        </ListViewItem>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
             <StackPanel x:Name="AddView"
                         Grid.Column="0"
                         Orientation="Vertical"
                         HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Visibility="Collapsed">
+                        Visibility="Visible">
                 <CalendarView x:Name="Calendar"
                               SelectionMode="Single"
                               Margin="10, 10, 10, 10"
                               HorizontalAlignment="Center"
-                              CalendarViewDayItemChanging="Calendar_CalendarViewDayItemChanging"/>
+                              CalendarViewDayItemChanging="Calendar_CalendarViewDayItemChanging"
+                              SelectedDatesChanged="Calendar_SelectedDatesChanged" />
                 <Button x:Name="AddNoteButton"
                         Content="Add Note"
                         Margin="10, 10, 10, 10"
-                        Click="AddNoteButton_Click"/>
+                        Click="AddNoteButton_Click" />
+                <Button x:Name="TemplateButton"
+                        Content="Add Note"
+                        Margin="10, 10, 10, 10"
+                        Click="TemplateButton_Click" />
             </StackPanel>
             <TabView x:Name="NotesTabs"
                      Grid.Column="1"
                      IsAddTabButtonVisible="False"
                      TabCloseRequested="NotesTabs_TabCloseRequested"
-                     VerticalAlignment="Stretch">
-                <TabView.TabItemTemplate>
-                    <DataTemplate x:DataType="local:Note">
+                     VerticalAlignment="Stretch"
+                     TabItemTemplateSelector="{StaticResource TemplateSelector}">
+
+                <TabView.Resources>
+                    <DataTemplate x:Key="NotesTemplate"
+                                  x:DataType="local:Note">
                         <TabViewItem>
                             <TabViewItem.Header>
                                 <TextBlock Text="{x:Bind Date, Mode=OneWay}" />
@@ -82,8 +74,31 @@
                                      VerticalAlignment="Stretch" />
                         </TabViewItem>
                     </DataTemplate>
-                </TabView.TabItemTemplate>
+
+                    <DataTemplate x:Key="TemplateMaker"
+                                  x:DataType="local:Note">
+                        <TabViewItem>
+                            <TabViewItem.Header>
+                                <TextBlock Text="{x:Bind Date, Mode=OneWay}" />
+                            </TabViewItem.Header>
+                            <TextBox AcceptsReturn="True"
+                                     Text="{x:Bind Content, Mode=OneWay}"
+                                     TextChanged="TextBox_TextChanged"
+                                     TextWrapping="Wrap"
+                                     Margin="10, 10, 10, 10"
+                                     HorizontalAlignment="Stretch"
+                                     VerticalAlignment="Stretch" />
+                        </TabViewItem>
+                    </DataTemplate>
+
+                    <local:TemplateSelector x:Key="TemplateSelector"
+                                            NotesTemplate="{StaticResource NotesTemplate}"
+                                            TemplateMaker="{StaticResource TemplateMaker}" />
+                </TabView.Resources>
+
             </TabView>
         </Grid>
     </RelativePanel>
+
 </Window>
+   
