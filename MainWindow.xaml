@@ -47,7 +47,7 @@
                         Margin="10, 10, 10, 10"
                         Click="AddNoteButton_Click" />
                 <Button x:Name="TemplateButton"
-                        Content="Add Note"
+                        Content="Edit Template"
                         Margin="10, 10, 10, 10"
                         Click="TemplateButton_Click" />
             </StackPanel>
@@ -55,15 +55,12 @@
                      Grid.Column="1"
                      IsAddTabButtonVisible="False"
                      TabCloseRequested="NotesTabs_TabCloseRequested"
-                     VerticalAlignment="Stretch"
-                     TabItemTemplateSelector="{StaticResource TemplateSelector}">
-
-                <TabView.Resources>
-                    <DataTemplate x:Key="NotesTemplate"
-                                  x:DataType="local:Note">
+                     VerticalAlignment="Stretch">
+                <TabView.TabItemTemplate>
+                    <DataTemplate x:DataType="local:Note">
                         <TabViewItem>
                             <TabViewItem.Header>
-                                <TextBlock Text="{x:Bind Date, Mode=OneWay}" />
+                                <TextBlock Text="{x:Bind Title, Mode=OneWay}" />
                             </TabViewItem.Header>
                             <TextBox AcceptsReturn="True"
                                      Text="{x:Bind Content, Mode=OneWay}"
@@ -74,28 +71,7 @@
                                      VerticalAlignment="Stretch" />
                         </TabViewItem>
                     </DataTemplate>
-
-                    <DataTemplate x:Key="TemplateMaker"
-                                  x:DataType="local:Note">
-                        <TabViewItem>
-                            <TabViewItem.Header>
-                                <TextBlock Text="{x:Bind Date, Mode=OneWay}" />
-                            </TabViewItem.Header>
-                            <TextBox AcceptsReturn="True"
-                                     Text="{x:Bind Content, Mode=OneWay}"
-                                     TextChanged="TextBox_TextChanged"
-                                     TextWrapping="Wrap"
-                                     Margin="10, 10, 10, 10"
-                                     HorizontalAlignment="Stretch"
-                                     VerticalAlignment="Stretch" />
-                        </TabViewItem>
-                    </DataTemplate>
-
-                    <local:TemplateSelector x:Key="TemplateSelector"
-                                            NotesTemplate="{StaticResource NotesTemplate}"
-                                            TemplateMaker="{StaticResource TemplateMaker}" />
-                </TabView.Resources>
-
+                </TabView.TabItemTemplate>
             </TabView>
         </Grid>
     </RelativePanel>

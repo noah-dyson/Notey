@@ -7,6 +7,8 @@ using Windows.Storage.Search;
 using System.Collections.Generic;
 using Microsoft.UI.Xaml.Media;
 using System.Diagnostics;
+using Microsoft.UI.Xaml.Controls.Primitives;
+using System.Text;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -20,6 +22,7 @@ namespace Notey
     {
         List<Note> openNotes = new List<Note>();
         List<Note> notes = new List<Note>();
+        Note template;
 
         public MainWindow()
         {
@@ -35,15 +38,17 @@ namespace Notey
 
             foreach (StorageFile file in files)
             {
+                if (file.Name == "template.md")
+                {
+                    string fileContent = await File.ReadAllTextAsync(@"D:\Dev\Windows Apps\Notey\Notes\template.md", System.Text.Encoding.UTF8);
+
+                    template = new Note(file.Name);
+                    template.LoadContent(fileContent);
+                    return;
+                }
                 Note note = new Note(file.Name);
                 notes.Add(note);
-
             }
-        }
-
-        private async void NotesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-           
         }
 
         private async void NotesTabs_TabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args)
@@ -78,7 +83,7 @@ namespace Notey
             {
                 foreach (Note note in notes)
                 {
-                    if (note.Date == DateOnly.FromDateTime(args.Item.Date.Date))
+                    if (note.Title == Note.DateOnlytoTitle(DateOnly.FromDateTime(args.Item.Date.Date)))
                     {
                         args.Item.Background = (Brush)Application.Current.Resources["AccentFillColorDefaultBrush"];
                     }
@@ -86,13 +91,16 @@ namespace Notey
             }
         }
 
-        private void AddNoteButton_Click(object sender, RoutedEventArgs e)
+        private async void AddNoteButton_Click(object sender, RoutedEventArgs e)
         {
             if (Calendar.SelectedDates.Count > 0)
             {
                 string filename = Note.DateOnlytoTitle(DateOnly.FromDateTime(Calendar.SelectedDates[0].Date));
                 Note note = new Note(filename);
+
                 File.Create(@"D:\Dev\Windows Apps\Notey\Notes\" + filename);
+
+                note.LoadContent(template.Content);
                 notes.Add(note);
                 openNotes.Add(note);
                 NotesTabs.TabItems.Add(note);
@@ -105,7 +113,7 @@ namespace Notey
             {
                 foreach (Note note in notes)
                 {
-                    if (note.Date == DateOnly.FromDateTime(args.AddedDates[0].Date))
+                    if (note.Title == Note.DateOnlytoTitle(DateOnly.FromDateTime(args.AddedDates[0].Date)))
                     {
                         for (int i = 0; i < openNotes.Count; i++)
                         {
@@ -137,9 +145,16 @@ namespace Notey
             }
         }
 
-        private void TemplateButton_Click(object sender, RoutedEventArgs e)
+        private async void TemplateButton_Click(object sender, RoutedEventArgs e)
         {
+            string file = @"D:\Dev\Windows Apps\Notey\Notes\template.md";
+            string fileContent = await File.ReadAllTextAsync(file, System.Text.Encoding.UTF8);
 
+            template.LoadContent(fileContent);
+            openNotes.Add(template);
+            NotesTabs.TabItems.Add(template);
+
+            NotesTabs.SelectedItem = template;
         }
     }
 }

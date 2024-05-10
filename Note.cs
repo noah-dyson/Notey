@@ -7,12 +7,10 @@ namespace Notey
     {
         public string Title { get; set; }
         public string Content { get; set; }
-        public DateOnly Date { get; set; }
 
         public Note(string title)
         {
             Title = title;
-            Date = DateOnly.Parse(Title.Substring(0, 10));
         }
 
         public void LoadContent(string content)
