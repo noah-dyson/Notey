@@ -2,7 +2,7 @@
 
 Notes app for simple daily note taking on Windows, built using the WinUI3 UI framework.
 
-## Getting Started
+### Getting Started
 
 Once the app is running, you can select a date using the calendar to create a note for that day. Close the tab to save the file.
 
